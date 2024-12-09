@@ -1,10 +1,11 @@
 const express = require("express");
+
+const authGuestUser = require("../middlewares/auth/authGuestUser");
 const { getOrders } = require("../controller/orderController");
-const { protect } = require("../controller/authController");
+const handleGuestError = require("../utils/handleGuestError");
 
 const router = express.Router();
 
-// router.post("/placeOrder", protect, placeOrder);
-router.route("/").get(protect, getOrders);
+router.route("/").get(authGuestUser(handleGuestError), getOrders);
 
 module.exports = router;

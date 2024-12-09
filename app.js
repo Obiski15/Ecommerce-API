@@ -39,15 +39,10 @@ app.use(cookieParser());
 app.use(express.json());
 
 // cross origin policy
-const allowedOrigins = [
-  "http://localhost:d{4}/",
-  "https://obiski-ruvid-store.vercel.app",
-];
-
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin || process.env.ALLOWED_ORIGINS.split(",").includes(origin)) {
         callback(null, origin);
       } else {
         callback(new Error("Origin not allowed. Blocked by cors.."));

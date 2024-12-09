@@ -1,9 +1,11 @@
 const express = require("express");
+
+const authGuestUser = require("../middlewares/auth/authGuestUser");
+const handleGuestError = require("../utils/handleGuestError");
+const protect = require("../middlewares/auth/protect");
 const {
   signup,
   login,
-  restrictUser,
-  protect,
   logout,
   forgotPassword,
   resetPassword,
@@ -24,8 +26,8 @@ router.post("/login", login);
 
 router
   .route("/")
-  .delete(protect, restrictUser("admin"), deleteUser)
-  .patch(protect, updateUser)
-  .get(protect, getUser);
+  .get(authGuestUser(handleGuestError), getUser)
+  .delete(protect, deleteUser)
+  .patch(protect, updateUser);
 
 module.exports = router;

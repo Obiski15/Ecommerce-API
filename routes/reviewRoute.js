@@ -1,11 +1,14 @@
 const express = require("express");
+
+const restrictUser = require("../middlewares/auth/restrictUser");
+const protect = require("../middlewares/auth/protect");
+
 const {
   getReviewsByProductId,
   getReviews,
   addReview,
   deleteReview,
 } = require("../controller/reviewController");
-const { protect, restrictUser } = require("../controller/authController");
 
 const router = express.Router();
 

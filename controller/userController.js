@@ -1,6 +1,5 @@
-const User = require("../model/userModel");
-const AppError = require("../utils/AppError");
 const catchAsync = require("../utils/catchAsync");
+const User = require("../model/userModel");
 
 exports.getUser = catchAsync(async (req, res, next) => {
   res.status(200).json({
@@ -23,6 +22,10 @@ exports.updateUser = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.deleteUser = catchAsync(async (req, res, next) =>
-  next(new AppError("Route not yet defined", 404)),
-);
+exports.deleteUser = catchAsync(async (req, res, next) => {
+  await User.findOneAndDelete({ _id: req.user._id });
+
+  res.clearCookie("jwt");
+
+  res.status(200).json({ status: "success" });
+});

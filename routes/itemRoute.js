@@ -1,4 +1,7 @@
 const express = require("express");
+
+const restrictUser = require("../middlewares/auth/restrictUser");
+const protect = require("../middlewares/auth/protect");
 const {
   getItems,
   getItem,
@@ -8,7 +11,6 @@ const {
   searchItems,
   getHints,
 } = require("../controller/itemController");
-const { protect, restrictUser } = require("../controller/authController");
 
 const router = express.Router();
 

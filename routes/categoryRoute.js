@@ -1,4 +1,7 @@
 const express = require("express");
+
+const restrictUser = require("../middlewares/auth/restrictUser");
+const protect = require("../middlewares/auth/protect");
 const {
   getCategories,
   addCategory,
@@ -6,7 +9,6 @@ const {
   editCategory,
   getCategory,
 } = require("../controller/categoryController");
-const { protect, restrictUser } = require("../controller/authController");
 
 const router = express.Router();
 

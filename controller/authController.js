@@ -2,9 +2,9 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 
 const catchAsync = require("../utils/catchAsync");
+const sendMail = require("../utils/sendMail");
 const AppError = require("../utils/AppError");
 const User = require("../model/userModel");
-const sendMail = require("../utils/sendMail");
 
 function signToken(id) {
   return jwt.sign(id, process.env.JWT_SECRET, {
@@ -18,7 +18,7 @@ function createSendToken(user, res, statusCode) {
   const cookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "None",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
     expires: new Date(
       Date.now() + +process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000,
     ),
@@ -131,47 +131,3 @@ exports.logout = catchAsync(async (req, res, next) => {
 
   res.status(200).json({ status: "success" });
 });
-
-exports.protect = catchAsync(async (req, res, next) => {
-  let token;
-
-  // check if token exist
-  if (req.headers.authorization) {
-    if (!req.headers.authorization.startsWith("Bearer"))
-      return next(new AppError("Invalid or missing auth token"));
-    token = req.headers.authorization.split(" ")[1];
-  } else {
-    token = req.cookies.jwt;
-  }
-
-  // throw an error if token doesn't exist
-  if (!token) return next(new AppError("Missing auth Token", 400));
-
-  // verify token
-  const { id, iat } = jwt.verify(token, process.env.JWT_SECRET);
-
-  // find user
-  const user = await User.findById(id);
-
-  if (!user) return next(new AppError("User not found", 401));
-
-  // check last time user last changed password
-  const passwordChanged = await user.confirmPasswordChange(iat);
-
-  if (passwordChanged)
-    return next(
-      new AppError("Password changed since last login. Login again", 401),
-    );
-
-  req.user = user;
-
-  next();
-});
-
-exports.restrictUser = (...roles) =>
-  catchAsync(async (req, res, next) => {
-    if (!roles.includes(req.user.role))
-      return next(new AppError("Access Denied", 403));
-
-    next();
-  });

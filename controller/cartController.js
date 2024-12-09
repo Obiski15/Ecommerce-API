@@ -5,8 +5,18 @@ const AppError = require("../utils/AppError");
 const Cart = require("../model/cartModel");
 const Item = require("../model/itemModel");
 
+function cartQuery(req) {
+  if (req.user) {
+    return { user: req.user._id };
+  }
+
+  if (req.guestId) {
+    return { guest: req.guestId };
+  }
+}
+
 exports.getCart = catchAsync(async (req, res, next) => {
-  const cart = await Cart.findOne({ user: req.user._id })
+  const cart = await Cart.findOne({ ...cartQuery(req) })
     .populate("items.product")
     .exec();
 
@@ -20,8 +30,8 @@ exports.getCart = catchAsync(async (req, res, next) => {
 
 exports.clearCart = catchAsync(async (req, res, next) => {
   await Cart.findOneAndUpdate(
-    { user: req.user._id },
-    { $set: { items: [], totalPrice: 0 } },
+    { ...cartQuery(req) },
+    { $set: { items: [], totalPrice: 0, deliveryFee: 0 } },
   );
 
   res.status(200).json({
@@ -42,13 +52,20 @@ exports.addToCart = catchAsync(async (req, res, next) => {
   if (!item)
     return next(new AppError("Product not found. Invalid Product id", 404));
 
-  const cart = await Cart.findOne({ user: req.user._id });
+  const cart = await Cart.findOne({ ...cartQuery(req) });
 
   // if there is no cart associated with user, create a new cart
   if (!cart) {
     const newCart = new Cart();
     newCart.items.push({ product: item, quantity: 1 });
-    newCart.user = req.user._id;
+
+    if (!req.user && req.userType === "guest") {
+      newCart.guest = req.guestId;
+    }
+
+    if (req.user && req.userType === "returning") {
+      newCart.user = req.user._id;
+    }
 
     await newCart.save({ validateBeforeSave: true });
   }
@@ -59,16 +76,14 @@ exports.addToCart = catchAsync(async (req, res, next) => {
       (product) => product.product._id.toString() === productId,
     );
 
-    // if product is in cart update total price and quantity;
     if (productIndex > -1) {
       cart.items[productIndex].quantity += 1;
     } else {
-      // if item is not in cart, add item
       cart.items.push({ product: productId, quantity: 1 });
     }
 
     // save to db
-    cart.save({ validateBeforeSave: true });
+    await cart.save({ validateBeforeSave: true });
   }
 
   res.status(200).json({
@@ -87,7 +102,7 @@ exports.removeItemFromCart = catchAsync(async (req, res, next) => {
   if (!item) return next(new AppError("Invalid Product id", 400));
 
   // find cart
-  const cart = await Cart.findOne({ user: req.user._id });
+  const cart = await Cart.findOne({ ...cartQuery(req) });
 
   // throw an error if cart's not found
   if (!cart) return next(new AppError("Cart not found", 404));
@@ -108,7 +123,7 @@ exports.removeItemFromCart = catchAsync(async (req, res, next) => {
   }
 
   // save to DB
-  cart.save({ validateBeforeSave: true });
+  await cart.save({ validateBeforeSave: true });
 
   res.status(200).json({
     status: "success",
@@ -126,14 +141,14 @@ exports.removeFromCart = catchAsync(async (req, res, next) => {
   if (!item) return next(new AppError("Invalid Product id", 400));
 
   const cart = await Cart.findOneAndUpdate(
-    { user: req.user._id },
+    { ...cartQuery(req) },
     { $pull: { items: { product: item._id } } },
     { new: true },
   );
 
   if (!cart) return next(new AppError("Cart not found", 404));
 
-  cart.save({ validateBeforeSave: true });
+  await cart.save({ validateBeforeSave: true });
 
   res.status(200).json({
     status: "success",
