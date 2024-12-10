@@ -4,20 +4,31 @@ const categorySchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, "Item category needs to be assigned a name"],
+      required: [true, "Category name is required"],
       lowercase: true,
-      trim: true,
       unique: true,
+      trim: true,
     },
     image: {
       type: String,
-      required: [true, "Item image needs to be assigned a value"],
+      required: [true, "Category image is required"],
       trim: true,
     },
-    subCategory: { type: [String], lowercase: true },
+    subCategory: {
+      type: [String],
+      lowercase: true,
+      trim: true,
+    },
   },
   { timestamps: true },
 );
+
+// remove duplicate fields
+categorySchema.pre("save", function (next) {
+  this.subCategory = [...new Set(this.subCategory)];
+
+  next();
+});
 
 const Category = mongoose.model("Category", categorySchema);
 

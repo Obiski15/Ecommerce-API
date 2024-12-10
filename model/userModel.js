@@ -54,6 +54,8 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["user", "admin", "seller"],
       default: "user",
+      lowercase: true,
+      trim: true,
     },
     shippingAddress: {
       address: { type: String, lowercase: true, trim: true },

@@ -1,5 +1,3 @@
-const slugify = require("slugify");
-
 const ApiFeatures = require("../utils/ApiFeatures");
 const catchAsync = require("../utils/catchAsync");
 const Item = require("../model/itemModel");
@@ -32,35 +30,17 @@ exports.getItem = async (req, res, next) => {
   });
 };
 
-exports.getItemsByName = catchAsync(async (req, res, next) => {
-  const slug = slugify(req.params.productName, {
-    replacement: "-",
-    lower: true,
-    trim: true,
-  });
-
-  const query = new ApiFeatures(Item.find({ slug }), req.query)
-    .sort()
-    .paginate();
-  const items = await query.query;
-
-  res.status(200).json({
-    status: "success",
-    data: {
-      count: items.length,
-      items,
-    },
-  });
-});
-
 exports.getHints = catchAsync(async (req, res, next) => {
   const { query } = req.params;
 
-  const regex = new RegExp(`^${query}`);
-
   const items = await Item.find(
     {
-      name: { $regex: regex, $options: "i" },
+      $or: [
+        { name: { $regex: new RegExp(`^${query}`), $options: "i" } },
+        {
+          description: { $regex: new RegExp(`\\b${query}\\b`), $options: "i" },
+        },
+      ],
     },
     { name: 1 },
   ).limit(10);

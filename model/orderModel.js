@@ -9,15 +9,36 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
     shippingAddress: {
-      address: { type: String, required: true },
-      city: { type: String, required: true },
-      postalCode: { type: String, required: true },
-      country: { type: String, required: true },
+      address: {
+        type: String,
+        required: true,
+        lowercase: true,
+        trim: true,
+      },
+      city: {
+        type: String,
+        required: true,
+        lowercase: true,
+        trim: true,
+      },
+      postalCode: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+      country: {
+        type: String,
+        required: true,
+        lowercase: true,
+        trim: true,
+      },
     },
     paymentMethod: {
       type: String,
       required: true,
       enum: ["card", "btc", "bank transfer"],
+      lowercase: true,
+      trim: true,
     },
     paymentResult: {
       id: String,
@@ -25,9 +46,15 @@ const orderSchema = new mongoose.Schema(
         type: String,
         enum: ["processing", "success", "failed"],
         default: "processing",
+        lowercase: true,
+        trim: true,
       },
-      update_time: String,
-      email_address: String,
+      update_time: Date,
+      email_address: {
+        type: String,
+        lowercase: true,
+        trim: true,
+      },
     },
     discount: Number,
     itemPrice: { type: Number, required: true },
@@ -37,8 +64,6 @@ const orderSchema = new mongoose.Schema(
     },
     image: {
       type: String,
-      trim: true,
-      lowercase: true,
       required: true,
     },
     status: {
@@ -49,6 +74,8 @@ const orderSchema = new mongoose.Schema(
         "processing",
         "cancelled - failed payment",
       ],
+      lowercase: true,
+      trim: true,
     },
     name: {
       type: String,

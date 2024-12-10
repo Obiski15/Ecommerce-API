@@ -13,7 +13,7 @@ async function mergeCart(user, item) {
     await newCart.save({ validateBeforeSave: true });
   } else {
     const productIndex = cart.items.findIndex(
-      (i) => i.product === item.product,
+      (itm) => itm.product.toString() === item.product.toString(),
     );
 
     if (productIndex > -1) {
@@ -45,7 +45,11 @@ module.exports = catchAsync(async (req, res, next) => {
     }
 
     // clear cookie
-    res.clearCookie("guestId");
+    res.clearCookie("guestId", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    });
   }
 
   next();

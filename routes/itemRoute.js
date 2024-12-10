@@ -3,19 +3,17 @@ const express = require("express");
 const restrictUser = require("../middlewares/auth/restrictUser");
 const protect = require("../middlewares/auth/protect");
 const {
-  getItems,
-  getItem,
-  getItemsByName,
+  searchItems,
   deleteItem,
   updateItem,
-  searchItems,
+  getItems,
   getHints,
+  getItem,
 } = require("../controller/itemController");
 
 const router = express.Router();
 
 router.route("/").get(getItems);
-router.route("/product/:productName").get(getItemsByName);
 router.route("/search/:query").get(searchItems);
 router.route("/hints/:query").get(getHints);
 router
