@@ -8,15 +8,17 @@ const helmet = require("helmet");
 const cors = require("cors");
 const hpp = require("hpp");
 
+const { webhook } = require("./controller/paymentController");
+const errorHandler = require("./controller/errorController");
+
 const categoryRoute = require("./routes/categoryRoute");
 const wishlistRoute = require("./routes/wishlistRoute");
+const paymentRoute = require("./routes/paymentRoute");
 const reviewRoute = require("./routes/reviewRoute");
 const orderRoute = require("./routes/orderRoute");
 const itemRoute = require("./routes/itemRoute");
 const cartRoute = require("./routes/cartRoute");
 const userRoute = require("./routes/userRoute");
-
-const errorHandler = require("./controller/errorController");
 
 const app = express();
 
@@ -34,6 +36,13 @@ if (process.env.NODE_ENV === "development") app.use(morgan("dev"));
 
 // parse request cookies into req.cookies
 app.use(cookieParser());
+
+// parse raw data for stripe webhook
+app.post(
+  "/api/v1/payment/webhook",
+  express.raw({ type: "application/json" }),
+  webhook,
+);
 
 // parse request body into req.body
 app.use(express.json());
@@ -61,8 +70,10 @@ app.use(xss());
 // // sanitize request parameters
 app.use(mongoSanitise());
 
+// api routes
 app.use("/api/v1/categories", categoryRoute);
 app.use("/api/v1/wishlist", wishlistRoute);
+app.use("/api/v1/payment", paymentRoute);
 app.use("/api/v1/reviews", reviewRoute);
 app.use("/api/v1/order", orderRoute);
 app.use("/api/v1/items", itemRoute);

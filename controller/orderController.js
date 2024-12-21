@@ -1,6 +1,6 @@
-const Order = require("../model/orderModel");
 const ApiFeatures = require("../utils/ApiFeatures");
 const catchAsync = require("../utils/catchAsync");
+const Order = require("../model/orderModel");
 
 exports.getOrders = catchAsync(async (req, res, next) => {
   const query = new ApiFeatures(Order.find({ user: req.user._id }), req.query)
@@ -16,5 +16,3 @@ exports.getOrders = catchAsync(async (req, res, next) => {
     },
   });
 });
-
-exports.cancelOrder = catchAsync(async (req, res, next) => {});

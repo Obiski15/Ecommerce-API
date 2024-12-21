@@ -50,6 +50,8 @@ exports.login = async (req, res, next) => {
 
   const user = await User.findOne({ email }).select("+password");
 
+  if (!user) return next(new AppError("Invalid Login credentials", 400));
+
   const verifyPassword = await user.comparePassword(password, user.password);
 
   if (!verifyPassword)

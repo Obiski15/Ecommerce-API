@@ -54,7 +54,10 @@ const itemSchema = new mongoose.Schema(
       },
       specs: specificationsSchema,
     },
-    stock: { type: Number, default: 0 },
+    stock: {
+      type: Number,
+      required: [true, "Number of available products wasn't provided"],
+    },
   },
   { timestamps: true },
 );

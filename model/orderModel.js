@@ -1,5 +1,10 @@
 const mongoose = require("mongoose");
 
+const {
+  calculateDeliveryFee,
+  calculateFinalPrice,
+} = require("../utils/helpers/helpers");
+
 const orderSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -33,30 +38,10 @@ const orderSchema = new mongoose.Schema(
         trim: true,
       },
     },
-    paymentMethod: {
-      type: String,
-      required: true,
-      enum: ["card", "btc", "bank transfer"],
-      lowercase: true,
-      trim: true,
-    },
     paymentResult: {
-      id: String,
-      status: {
-        type: String,
-        enum: ["processing", "success", "failed"],
-        default: "processing",
-        lowercase: true,
-        trim: true,
-      },
-      update_time: Date,
-      email_address: {
-        type: String,
-        lowercase: true,
-        trim: true,
-      },
+      type: String,
+      select: false,
     },
-    discount: Number,
     itemPrice: { type: Number, required: true },
     quantity: {
       type: Number,
@@ -69,6 +54,7 @@ const orderSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: [
+        "order placed",
         "delivered",
         "cancelled - failed delivery",
         "processing",
@@ -83,8 +69,10 @@ const orderSchema = new mongoose.Schema(
       lowercase: true,
       required: true,
     },
-    shippingFee: { type: Number, required: true },
-    totalPrice: { type: Number, required: true },
+    weight: { type: Number, required: true },
+    discount: { type: Number, default: 0 },
+    deliveryFee: { type: Number, required: true, default: 0 },
+    amountPaid: { type: Number, required: true, default: 0 },
     isPaid: { type: Boolean, default: false },
     paidAt: { type: Date },
     isDelivered: { type: Boolean, default: false },
@@ -92,6 +80,17 @@ const orderSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+orderSchema.pre("save", async function (next) {
+  this.deliveryFee = calculateDeliveryFee(this.quantity, this.weight);
+  this.amountPaid = calculateFinalPrice(
+    this.itemPrice,
+    this.deliveryFee,
+    this.discount,
+  );
+
+  next();
+});
 
 const Order = mongoose.model("Order", orderSchema);
 
