@@ -14,7 +14,6 @@ exports.getCategories = catchAsync(async (req, res, next) => {
 });
 
 exports.getCategory = catchAsync(async (req, res, next) => {
-  console.log(req.params);
   const category = await Category.findOne({ name: req.params.categoryId });
 
   res.status(200).json({

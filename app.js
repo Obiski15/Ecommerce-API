@@ -38,11 +38,7 @@ if (process.env.NODE_ENV === "development") app.use(morgan("dev"));
 app.use(cookieParser());
 
 // parse raw data for stripe webhook
-app.post(
-  "/api/v1/payment/webhook",
-  express.raw({ type: "application/json" }),
-  webhook,
-);
+app.post("/api/v1/webhook", express.raw({ type: "application/json" }), webhook);
 
 // parse request body into req.body
 app.use(express.json());

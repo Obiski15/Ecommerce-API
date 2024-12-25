@@ -35,7 +35,7 @@ function handleOrderStatusUpdate(orders, user, paymentId) {
 
   [
     { time: processingTime, status: "processing" },
-    { time: deliveryTime, status: "delivery" },
+    { time: deliveryTime, status: "delivered" },
   ].forEach(({ time, status }) => {
     orders.forEach(() => {
       const job = new CronJob(
