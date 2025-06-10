@@ -14,11 +14,13 @@ const categorySchema = new mongoose.Schema(
       required: [true, "Category image is required"],
       trim: true,
     },
-    subCategory: {
-      type: [String],
-      lowercase: true,
-      trim: true,
-    },
+    subCategory: [
+      {
+        type: String,
+        lowercase: true,
+        trim: true,
+      },
+    ],
   },
   { timestamps: true },
 );

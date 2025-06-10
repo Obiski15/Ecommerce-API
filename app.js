@@ -19,6 +19,8 @@ const orderRoute = require("./routes/orderRoute");
 const itemRoute = require("./routes/itemRoute");
 const cartRoute = require("./routes/cartRoute");
 const userRoute = require("./routes/userRoute");
+// eslint-disable-next-line
+const adminRoute = require("./admin/adminRoute");
 
 const app = express();
 
@@ -75,6 +77,9 @@ app.use("/api/v1/order", orderRoute);
 app.use("/api/v1/items", itemRoute);
 app.use("/api/v1/cart", cartRoute);
 app.use("/api/v1/user", userRoute);
+
+// admin route
+app.use("/api/v1/admin", adminRoute);
 
 // handle app error
 app.use(errorHandler);
